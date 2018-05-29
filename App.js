@@ -8,10 +8,7 @@ import { Icon } from 'react-native-elements';
 import {
   createStackNavigator,
   createDrawerNavigator,
-  createSwitchNavigator,
-  DrawerItems,
-  SafeAreaView
-
+  createSwitchNavigator
 } from 'react-navigation';
 import Amplify, { Auth } from 'aws-amplify';
 import Client from 'aws-appsync';
@@ -21,9 +18,10 @@ import config from './aws-exports';
 import { appSyncConfig } from './AppSync';
 
 // components
-import AuthScreen from './components/auth';
-import Profile from './components/profile';
-import Loading from './utils/loading';
+import AuthScreen from './src/components/auth';
+import Profile from './src/components/profile';
+import MapContainer from './src/components/map';
+import Loading from './src/utils/loading';
 
 Amplify.configure(config);
 
@@ -87,34 +85,12 @@ const ProfileNav = createStackNavigator({
       },
       headerTintColor: '#ffffff'
     })
-  },
-  // MapScreen: {
-  //   screen: props => <View><Text>Map</Text></View>,
-  //   navigationOptions: ({ navigation, screenProps }) => ({
-  //     title: 'Map',
-  //     headerLeft: (
-  //       <Icon
-  //         onPress={() => navigation.openDrawer()}
-  //         name="menu"
-  //         containerStyle={{
-  //           paddingLeft: 16
-  //         }}
-  //       />
-  //     ),
-  //     headerStyle: {
-  //       backgroundColor: '#42a1f4'
-  //     },
-  //     headerTitleStyle: {
-  //       color: '#ffffff'
-  //     },
-  //     headerTintColor: '#ffffff'
-  //   })
-  // }
+  }
 });
 
 const MapNav = createStackNavigator({
   MapScreen: {
-    screen: props => <View><Text>Map</Text></View>,
+    screen: MapContainer,
     navigationOptions: ({ navigation, screenProps }) => ({
       title: 'Map',
       headerLeft: (
@@ -135,7 +111,7 @@ const MapNav = createStackNavigator({
       headerTintColor: '#ffffff'
     })
   }
-})
+});
 
 const DrawerNav = createDrawerNavigator({
   Map: MapNav,
@@ -158,35 +134,13 @@ const DrawerNav = createDrawerNavigator({
       headerTintColor: '#ffffff'
     })
   }
-}, {
-// contentComponent: props =>  {
-//   console.log('props', props); 
-//   return (
-//     <SafeAreaView style={{flex: 1}} forceInset={{ top: 'always', horizontal: 'never' }}>
-
-//       <DrawerItems 
-//         {...props} 
-//         // items=[]
-//         onItemPress={({route}) => {
-//           console.log('route', route, props)
-//           // props.navigation.navigate(route.routeName)
-//           // props.navigation.closeDrawer();
-//           props.descriptors[route.key].navigation.closeDrawer();
-//           props.navigation.navigate(route.key)
-
-//         }}
-//       />
-//     </SafeAreaView>
-//   )
-// }
-    
 });
 
 const Routes = createSwitchNavigator({
   Auth: AuthStack,
   DrawerNav
   // AppNav
-  
+
 }, {
   initialRoute: 'SignIn'
 });

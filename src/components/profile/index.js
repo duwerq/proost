@@ -1,6 +1,6 @@
 import React from 'react';
-import Amplify, { Auth } from 'aws-amplify'
-import { graphql, compose } from 'react-apollo'
+import Amplify, { Auth } from 'aws-amplify';
+import { graphql, compose } from 'react-apollo';
 
 // components
 import ProfileForm from './Form';
@@ -12,21 +12,19 @@ import UpdateProfile from '../../queries/profile/Update';
 
 export default compose(
   graphql(CreateProfile, {
-    options:{
+    options: {
       fetchPolicy: 'cache-and-network'
     },
-    props: (props) => ({
-      createProfile: profile => {
-        return props.mutate({
-          variables: profile,
-          optimisticResponse: (responseProps) => {
-            const defaultProfile = {
-              userid: '', firstName: '', lastName: '', birdthdate: '', gender: '', location: ''
-            }
-            return({ createProfile: {...profile, ...defaultProfile, __typename: 'Profile' } })
-          }
-        });
-      }
+    props: props => ({
+      createProfile: profile => props.mutate({
+        variables: profile,
+        optimisticResponse: (responseProps) => {
+          const defaultProfile = {
+            userid: '', firstName: '', lastName: '', birdthdate: '', gender: '', location: ''
+          };
+          return({ createProfile: { ...profile, ...defaultProfile, __typename: 'Profile' } });
+        }
+      })
     }),
     options: {
       refetchQueries: [{ query: GetProfile }],
@@ -34,40 +32,36 @@ export default compose(
         const query = GetProfile;
         const data = dataProxy.readQuery({ query });
         dataProxy.writeQuery({ query, data });
-    }
+      }
     }
   }),
   graphql(UpdateProfile, {
-    props: (props) => ({
+    props: props => ({
       updateProfile: (profile) => {
-          props.mutate({
+        props.mutate({
           variables: profile,
-          optimisticResponse: (responseProps) => {
-            return({ updateProfile: {...profile, __typename: 'Profile' } })
-          }
-        })
+          optimisticResponse: responseProps => ({ updateProfile: { ...profile, __typename: 'Profile' } })
+        });
       }
     }),
     options: {
-        refetchQueries: [{ query: GetProfile }],
-        update: (dataProxy, { data: { updateProfile } }) => {
-            const query = GetProfile;
-            const data = dataProxy.readQuery({ query });
-            dataProxy.writeQuery({ query, data });
-        }
+      refetchQueries: [{ query: GetProfile }],
+      update: (dataProxy, { data: { updateProfile } }) => {
+        const query = GetProfile;
+        const data = dataProxy.readQuery({ query });
+        dataProxy.writeQuery({ query, data });
+      }
     }
   }),
   graphql(GetProfile, {
-     options:{
+    options: {
       fetchPolicy: 'cache-and-network'
     },
-    props: (props) => {
-      // console.log('GET PROFILE GRAPHQL', props)
-      return ({
-        loading: props.data.loading,
-        profile: props.data.getProfile && props.data.getProfile
-      })
-      
-    }
+    props: props => ({
+      loading: props.data.loading,
+      profile: props.data.getProfile && props.data.getProfile
+    })
+
+
   })
 )(ProfileForm);

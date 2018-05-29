@@ -34,13 +34,13 @@ export default class AuthScreen extends Component {
     Auth.currentSession()
       .then((user) => {
         if (this.props.user.profile) {
-          this.props.navigatation.navigate('Map')
+          this.props.navigatation.navigate('Map');
         } else {
           this.props.navigation.navigate('EditProfile');
         }
       })
       .catch((error) => {
-        this.setState({ loading: false});
+        this.setState({ loading: false });
       });
   }
 
@@ -51,7 +51,10 @@ export default class AuthScreen extends Component {
     }
   }
 
-  inputs = {}
+
+  onChangeInput = (key, value) => {
+    this.setState({ [key]: value, error: null });
+  }
 
   confirmUser = async () => {
     const { username, authCode, password } = this.state;
@@ -65,33 +68,30 @@ export default class AuthScreen extends Component {
     }
   }
 
-  formatErrorMessage = (error) => error.message || error;
-
-  _focusNextField = (nextField) => {
+  focusNextField = (nextField) => {
     this.inputs[nextField].focus();
   }
 
-  onChangeInput = (key, value) => {
-    this.setState({[key]: value, error: null})
-  }
+  formatErrorMessage = error => error.message || error;
+
+  inputs = {}
 
   _onFocus = (field, scrollValue = 0) => {
     this.inputs[field].measureLayout(
       findNodeHandle(this.scrollView),
       (x, y, width, height) => {
         this.scrollView.scrollTo({ x: 0, y: y - (200 + scrollValue), animated: true });
-    });
+      });
   }
 
   resendAuthCode = (username) => {
-    this.setState({error: false})
+    this.setState({ error: false });
     Auth.resendSignUp(username)
       .then(() => {
-        console.log('code resent')
-        this.setState({loading: false, authCode: ''})
+        this.setState({ loading: false, authCode: '' });
       })
-      .catch(err => {
-        this.setState({loading: false, error: this.formatErrorMessage(err)});
+      .catch((err) => {
+        this.setState({ loading: false, error: this.formatErrorMessage(err) });
       });
   }
 
@@ -101,8 +101,7 @@ export default class AuthScreen extends Component {
         this.props.navigation.navigate('Profile');
       })
       .catch((error) => {
-        console.log('error', signin)
-        this.setState({error: this.formatErrorMessage(error), loading: false});
+        this.setState({ error: this.formatErrorMessage(error), loading: false });
       });
   }
 
@@ -115,20 +114,20 @@ export default class AuthScreen extends Component {
     }).then((user) => {
       this.setState({ showAuthCode: true, loading: false });
     })
-    .catch((error) => {
-      if (error.code === 'UsernameExistsException') {
-        this.setState({
-          showAuthCode: true,
-          error: this.formatErrorMessage(error), 
-          loading: false
-        });
-      } else {
-        this.setState({
-          error: this.formatErrorMessage(error), 
-          loading: false
-        });
-      }
-    });
+      .catch((error) => {
+        if (error.code === 'UsernameExistsException') {
+          this.setState({
+            showAuthCode: true,
+            error: this.formatErrorMessage(error),
+            loading: false
+          });
+        } else {
+          this.setState({
+            error: this.formatErrorMessage(error),
+            loading: false
+          });
+        }
+      });
   }
 
   submitAction = () => {
@@ -138,19 +137,17 @@ export default class AuthScreen extends Component {
       email, password, username, phoneNumber, showAuthCode, error
     } = this.state;
 
-    this.setState({loading: true});
+    this.setState({ loading: true });
     if (showAuthCode) {
       if (error) {
         this.resendAuthCode(username);
       } else {
         this.confirmUser();
       }
-    } else {
-      if (routeName === 'SignIn') {
-        this.signIn(username, password);
-      } else if (routeName === 'SignUp') {
-        this.signUp(username, password, email, phoneNumber);
-      }
+    } else if (routeName === 'SignIn') {
+      this.signIn(username, password);
+    } else if (routeName === 'SignUp') {
+      this.signUp(username, password, email, phoneNumber);
     }
   }
 
@@ -169,28 +166,28 @@ export default class AuthScreen extends Component {
       error
     } = this.state;
     const isRouteSignUp = routeName === 'SignUp';
-    let submitButtonText = 'Submit'
+    let submitButtonText = 'Submit';
     if (showAuthCode && error) {
-      submitButtonText = "Get New Auth Code"
-    } else if (showAuthCode)  {
-      submitButtonText = "Confirm Sign Up"
+      submitButtonText = 'Get New Auth Code';
+    } else if (showAuthCode) {
+      submitButtonText = 'Confirm Sign Up';
     }
 
     if (loading) return <LoadingScreen />;
     return (
       <View style={styles.authContainer}>
         {error &&
-          <ErrorMessage 
+          <ErrorMessage
             error={error}
           />
         }
-        <ScrollView 
-          contentContainerStyle={styles.scrollContainer} 
-          ref={(r) => { this.scrollView = r; }} 
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          ref={(r) => { this.scrollView = r; }}
           showsVerticalScrollIndicator={false}
           keyboardDismissMode="on-drag"
         >
-          <View style={{flex: 1}} >
+          <View style={{ flex: 1 }} >
             {!showAuthCode &&
               <React.Fragment>
                 <FormLabel>Username</FormLabel>
@@ -201,11 +198,11 @@ export default class AuthScreen extends Component {
                   blurOnSubmit={false}
                   returnKeyType="next"
                   onSubmitEditing={() => {
-                    const nextField = isRouteSignUp ? 'phoneNumber' : 'password'
-                    this._focusNextField(nextField)
+                    const nextField = isRouteSignUp ? 'phoneNumber' : 'password';
+                    this.focusNextField(nextField);
                   }}
-                  ref={i => {this.inputs.username = i}}
-                  onFocus={() => { if (!isRouteSignUp) this._onFocus('username', -65) } }
+                  ref={(i) => { this.inputs.username = i; }}
+                  onFocus={() => { if (!isRouteSignUp) this._onFocus('username', -65); }}
                 />
                 {isRouteSignUp &&
                   <React.Fragment>
@@ -217,8 +214,8 @@ export default class AuthScreen extends Component {
                       keyboardType="phone-pad"
                       returnKeyType="next"
                       blurOnSubmit={false}
-                      onSubmitEditing={() => this._focusNextField('password')}
-                      ref={i => {this.inputs.phoneNumber = i}}
+                      onSubmitEditing={() => this.focusNextField('password')}
+                      ref={(i) => { this.inputs.phoneNumber = i; }}
                     />
                   </React.Fragment>
                 }
@@ -229,13 +226,12 @@ export default class AuthScreen extends Component {
                   secureTextEntry
                   style={styles.authInput}
                   keyboardType="default"
-                  secureTextEntry
                   returnKeyType="default"
                   onSubmitEditing={this.submitAction}
                   blurOnSubmit
-                  ref={i => {this.inputs.password = i}}
+                  ref={(i) => { this.inputs.password = i; }}
                 />
-              </React.Fragment> 
+              </React.Fragment>
             }
             {/* {isRouteSignUp &&
               <React.Fragment>
@@ -248,7 +244,7 @@ export default class AuthScreen extends Component {
                 />
               </React.Fragment>
             } */}
-            {showAuthCode && !error && 
+            {showAuthCode && !error &&
               <React.Fragment>
                 <FormLabel>Auth Code</FormLabel>
                 <TextInput
@@ -256,11 +252,9 @@ export default class AuthScreen extends Component {
                   value={authCode}
                   style={styles.authInput}
                   blurOnSubmit
-                  // returnKeyType="go"
-                  
                   onSubmitEditing={this.submitAction}
-                  ref={i => {this.inputs.authCode = i}}
-                  onFocus={() => { if (!isRouteSignUp) this._onFocus('authCode') } }
+                  ref={(i) => { this.inputs.authCode = i; }}
+                  onFocus={() => { if (!isRouteSignUp) this._onFocus('authCode'); }}
                 />
               </React.Fragment>
             }
@@ -294,11 +288,10 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     paddingRight: 16,
     width: '100%',
-    position: 'relative',
-    // paddingTop: '33%'
+    position: 'relative'
   },
   scrollContainer: {
-    display: 'flex', 
+    display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-start',
     paddingTop: '20%',
@@ -327,7 +320,6 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    height: 50,
-    borderWidth: 2
+    height: 50
   }
 });
